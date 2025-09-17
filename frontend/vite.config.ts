@@ -4,9 +4,22 @@ import path from 'path'
 
 export default defineConfig({
   plugins: [react()],
+  base: '/', // Asegurar base path correcto para producción
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+    },
+  },
+  build: {
+    // En producción (Railway), compilar directamente en backend/public
+    outDir: process.env.NODE_ENV === 'production' ? '../backend/public' : 'dist',
+    emptyOutDir: true, // Limpiar el directorio antes de compilar
+    assetsDir: 'assets',
+    sourcemap: false, // Deshabilitar sourcemaps en producción para optimizar
+    rollupOptions: {
+      output: {
+        manualChunks: undefined, // Simplificar para evitar problemas de chunking
+      },
     },
   },
   server: {

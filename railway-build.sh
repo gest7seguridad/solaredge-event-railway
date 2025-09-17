@@ -4,7 +4,12 @@
 echo "🚀 Starting Railway Build..."
 echo "=============================="
 
-# Instalar dependencias del nivel raíz primero
+# Establecer NODE_ENV para producción
+export NODE_ENV=production
+echo "📝 NODE_ENV set to: $NODE_ENV"
+
+# Instalar dependencias del nivel raíz
+echo ""
 echo "📦 Installing root dependencies..."
 npm install --production=false --no-optional --legacy-peer-deps
 
@@ -16,15 +21,16 @@ cd backend
 echo "  Installing backend dependencies..."
 npm install --production=false --no-optional --legacy-peer-deps
 
+echo "  Creating public directory for frontend..."
+mkdir -p public
+
 echo "  Compiling TypeScript..."
 npm run build
 
-echo "  Checking backend dist..."
-ls -la dist/ 2>/dev/null || echo "  ⚠️  No dist folder yet"
+echo "  ✅ Backend compiled"
+ls -la dist/server.js 2>/dev/null && echo "  ✅ server.js exists"
 
-echo "✅ Backend ready!"
-
-# Frontend  
+# Frontend - se compilará directamente en backend/public gracias a vite.config.ts
 echo ""
 echo "🎨 Building Frontend..."
 cd ../frontend
@@ -32,44 +38,45 @@ cd ../frontend
 echo "  Installing frontend dependencies..."
 npm install --production=false --no-optional --legacy-peer-deps
 
-echo "  Creating production build..."
-npm run build
+echo "  Creating production build (will output to backend/public)..."
+NODE_ENV=production npm run build
 
-echo "  Checking frontend dist..."
-ls -la dist/ 2>/dev/null || echo "  ⚠️  No dist folder yet"
-if [ -f "dist/index.html" ]; then
-    echo "  ✅ index.html found"
+# Verificar que el frontend se compiló correctamente
+echo ""
+echo "📁 Verifying frontend build..."
+if [ -f "../backend/public/index.html" ]; then
+    echo "  ✅ Frontend built successfully in backend/public"
+    echo "  Files in backend/public:"
+    ls -la ../backend/public/ | head -10
 else
-    echo "  ❌ index.html NOT found"
+    echo "  ❌ Frontend build failed - index.html not found"
+    echo "  Attempting fallback copy..."
+    
+    # Fallback: si existe dist, copiarlo manualmente
+    if [ -d "dist" ]; then
+        echo "  Found dist folder, copying to backend/public..."
+        cp -r dist/* ../backend/public/
+        echo "  ✅ Fallback copy completed"
+    fi
 fi
 
-# IMPORTANTE: Mover el frontend compilado al backend para que persista
+# Verificación final
 echo ""
-echo "📦 Moving frontend to backend for persistence..."
+echo "📁 Final structure verification:"
 cd ..
-if [ -d "frontend/dist" ]; then
-    echo "  Creating backend/public directory..."
-    mkdir -p backend/public
-    echo "  Copying frontend dist to backend/public..."
-    cp -r frontend/dist/* backend/public/
-    echo "  ✅ Frontend copied to backend/public"
-    ls -la backend/public/ | head -10
-else
-    echo "  ❌ frontend/dist not found!"
+
+echo "  Backend dist exists: $([ -d "backend/dist" ] && echo '✅' || echo '❌')"
+echo "  Backend public exists: $([ -d "backend/public" ] && echo '✅' || echo '❌')"
+echo "  Backend public/index.html exists: $([ -f "backend/public/index.html" ] && echo '✅' || echo '❌')"
+
+if [ -d "backend/public" ]; then
+    echo "  Files in backend/public: $(ls backend/public | wc -l) files"
 fi
-
-echo "✅ Frontend ready!"
-
-# Verificar estructura final
-echo ""
-echo "📁 Final structure check:"
-echo "  Backend dist:"
-ls -la backend/dist/ 2>/dev/null || echo "    No backend/dist"
-echo "  Backend public (frontend):"
-ls -la backend/public/ 2>/dev/null || echo "    No backend/public"
-echo "  Original frontend dist:"
-ls -la frontend/dist/ 2>/dev/null || echo "    No frontend/dist"
 
 echo ""
 echo "=============================="
-echo "🎉 Build completed successfully!"
+if [ -f "backend/public/index.html" ]; then
+    echo "🎉 Build completed successfully!"
+else
+    echo "⚠️  Build completed but frontend might not be properly built"
+fi
