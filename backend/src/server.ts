@@ -73,82 +73,75 @@ app.get('/api/health', (req, res) => {
 if (process.env.NODE_ENV === 'production') {
   const fs = require('fs');
   
-  // En Railway, la app se ejecuta desde /app
-  // El backend compilado está en /app/backend/dist
-  // El frontend compilado debe estar en /app/frontend/dist
-  let frontendPath = path.join(__dirname, '../../frontend/dist');
+  // Ruta principal donde debería estar el frontend en Railway
+  const frontendPath = '/app/frontend/dist';
   
-  // Si estamos en Railway (detectado por la estructura de directorios)
-  if (__dirname.includes('/app/backend/dist')) {
-    frontendPath = '/app/frontend/dist';
-  }
+  console.log('📁 Verificando frontend en:', frontendPath);
+  console.log('📂 Existe el directorio?:', fs.existsSync(frontendPath));
   
-  console.log('📁 Buscando frontend en:', frontendPath);
-  console.log('📂 __dirname:', __dirname);
-  console.log('📂 process.cwd():', process.cwd());
-  
-  // Verificar si existe el directorio del frontend
   if (fs.existsSync(frontendPath)) {
-    console.log('✅ Directorio frontend encontrado');
-    const files = fs.readdirSync(frontendPath);
-    console.log('📄 Archivos en frontend/dist:', files.slice(0, 5).join(', '), files.length > 5 ? `... y ${files.length - 5} más` : '');
+    const indexPath = path.join(frontendPath, 'index.html');
+    console.log('📄 Existe index.html?:', fs.existsSync(indexPath));
     
-    // Servir archivos estáticos
-    app.use(express.static(frontendPath));
-    
-    // Todas las rutas no-API devuelven el index.html (para React Router)
-    app.get('*', (req, res) => {
-      const indexPath = path.join(frontendPath, 'index.html');
-      if (fs.existsSync(indexPath)) {
+    if (fs.existsSync(indexPath)) {
+      // Configurar Express para servir archivos estáticos
+      console.log('✅ Configurando servidor de archivos estáticos...');
+      
+      // IMPORTANTE: Servir archivos estáticos ANTES de las rutas catch-all
+      app.use(express.static(frontendPath));
+      
+      // Manejar rutas de React Router - DEBE ir DESPUÉS de express.static
+      app.get('*', (req, res, next) => {
+        // No procesar rutas API
+        if (req.path.startsWith('/api')) {
+          return next();
+        }
+        
+        // Enviar index.html para todas las demás rutas
         res.sendFile(indexPath);
-      } else {
-        res.status(404).json({ 
-          success: false, 
-          message: `Frontend index.html no encontrado en: ${indexPath}`,
-          frontendPath,
-          files: fs.readdirSync(frontendPath)
-        });
-      }
-    });
-  } else {
-    console.log('❌ Directorio frontend NO encontrado en:', frontendPath);
-    
-    // Intentar encontrar el frontend en diferentes ubicaciones
-    const possiblePaths = [
-      '/app/frontend/dist',
-      path.join(process.cwd(), 'frontend/dist'),
-      path.join(__dirname, '../../frontend/dist'),
-      path.join(__dirname, '../frontend/dist')
-    ];
-    
-    console.log('🔍 Buscando frontend en posibles ubicaciones:');
-    for (const p of possiblePaths) {
-      console.log(`  - ${p}: ${fs.existsSync(p) ? '✅ EXISTE' : '❌ NO EXISTE'}`);
-    }
-    
-    // Mostrar estructura de directorios para debugging
-    try {
-      console.log('📂 Contenido de /app:', fs.readdirSync('/app'));
-      if (fs.existsSync('/app/frontend')) {
-        console.log('📂 Contenido de /app/frontend:', fs.readdirSync('/app/frontend'));
-      }
-    } catch (e) {
-      console.log('⚠️  No se pudo leer /app:', e.message);
-    }
-    
-    app.get('*', (req, res) => {
-      res.status(404).json({ 
-        success: false, 
-        message: `Frontend no encontrado. El directorio ${frontendPath} no existe.`,
-        currentDir: __dirname,
-        cwd: process.cwd(),
-        possiblePaths: possiblePaths.map(p => ({ path: p, exists: fs.existsSync(p) })),
-        appContent: fs.existsSync('/app') ? fs.readdirSync('/app') : 'No /app dir'
       });
-    });
+      
+      console.log('✅ Frontend configurado correctamente');
+    } else {
+      console.log('❌ index.html no encontrado');
+      // Listar contenido del directorio para debugging
+      const files = fs.readdirSync(frontendPath);
+      console.log('📁 Archivos en frontend/dist:', files);
+      
+      app.get('*', (req, res) => {
+        if (req.path.startsWith('/api')) return;
+        res.status(404).json({
+          error: 'index.html no encontrado',
+          path: indexPath,
+          files: files
+        });
+      });
+    }
+  } else {
+    console.log('❌ Directorio frontend no encontrado');
+    
+    // Fallback: intentar con ruta relativa
+    const relativePath = path.join(__dirname, '../../frontend/dist');
+    if (fs.existsSync(relativePath)) {
+      console.log('📁 Usando ruta relativa:', relativePath);
+      app.use(express.static(relativePath));
+      app.get('*', (req, res, next) => {
+        if (req.path.startsWith('/api')) return next();
+        res.sendFile(path.join(relativePath, 'index.html'));
+      });
+    } else {
+      app.get('*', (req, res) => {
+        if (req.path.startsWith('/api')) return;
+        res.status(404).json({
+          error: 'Frontend no encontrado',
+          intentedPath: frontendPath,
+          relativePath: relativePath,
+          cwd: process.cwd(),
+          dirname: __dirname
+        });
+      });
+    }
   }
-} else {
-  console.log('ℹ️  Modo desarrollo - Frontend servido por Vite');
 }
 
 app.use(errorHandler);
