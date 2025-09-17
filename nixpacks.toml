@@ -8,9 +8,9 @@ nixPkgs = ["nodejs-18_x", "postgresql"]
 # Instalar todas las dependencias incluyendo TypeScript
 [phases.install]
 cmds = [
-  "npm install",
-  "cd backend && npm install",
-  "cd frontend && npm install"
+  "npm ci --omit=dev",
+  "cd backend && npm ci",
+  "cd frontend && npm ci"
 ]
 
 # Compilar backend y frontend
