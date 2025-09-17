@@ -16,7 +16,7 @@ module.exports = {
       max: 10
     },
     migrations: {
-      directory: './src/database/migrations',
+      directory: './src/database/migrations-fixed',
       tableName: 'knex_migrations'
     },
     seeds: {
@@ -27,11 +27,11 @@ module.exports = {
   production: {
     client: 'postgresql',
     connection: {
-      host: process.env.DB_HOST,
-      port: process.env.DB_PORT,
-      database: process.env.DB_NAME,
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
+      host: process.env.DB_HOST || 'gestsiete.es',
+      port: process.env.DB_PORT || 5432,
+      database: process.env.DB_NAME || 'events_n',
+      user: process.env.DB_USER || 'events_u',
+      password: process.env.DB_PASSWORD || 'events_pass$$',
       ssl: { rejectUnauthorized: false }
     },
     pool: {
@@ -39,7 +39,7 @@ module.exports = {
       max: 10
     },
     migrations: {
-      directory: './src/database/migrations',
+      directory: './src/database/migrations-fixed',
       tableName: 'knex_migrations'
     }
   }

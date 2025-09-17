@@ -8,7 +8,7 @@ export const getDatabaseConfig = () => {
     port: parseInt(process.env.DB_PORT || '5432'),
     database: process.env.DB_NAME || 'events_n',
     user: process.env.DB_USER || 'events_u',
-    password: process.env.DB_PASSWORD || 'events_pass$',
+    password: process.env.DB_PASSWORD || 'events_pass$$',
   };
 
   console.log('📊 Database configuration:');

@@ -69,6 +69,20 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
+// Servir archivos estáticos del frontend en producción
+if (process.env.NODE_ENV === 'production') {
+  const frontendPath = path.join(__dirname, '../../frontend/dist');
+  console.log('📁 Sirviendo frontend desde:', frontendPath);
+  
+  // Servir archivos estáticos
+  app.use(express.static(frontendPath));
+  
+  // Todas las rutas no-API devuelven el index.html (para React Router)
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(frontendPath, 'index.html'));
+  });
+}
+
 app.use(errorHandler);
 
 const startServer = async () => {
