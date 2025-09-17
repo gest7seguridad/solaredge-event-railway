@@ -3,26 +3,26 @@
 
 # Proveedor y versión de Node.js
 [phases.setup]
-nixPkgs = ["nodejs-18_x", "postgresql"]
+nixPkgs = ["nodejs-18_x"]
 
-# Instalar todas las dependencias incluyendo TypeScript
-[phases.install]
-cmds = [
-  "npm ci --omit=dev",
-  "cd backend && npm ci",
-  "cd frontend && npm ci"
-]
-
-# Compilar backend y frontend
+# Instalar dependencias y compilar en un solo paso
 [phases.build]
 cmds = [
-  "cd backend && npm run build",
-  "cd frontend && npm run build"
+  "echo '📦 Installing backend dependencies...'",
+  "cd backend && npm install --production=false",
+  "echo '🔨 Building backend...'",
+  "npm run build",
+  "echo '📦 Installing frontend dependencies...'",
+  "cd ../frontend && npm install --production=false",
+  "echo '🎨 Building frontend...'",
+  "npm run build",
+  "echo '✅ Build completed!'"
 ]
 
 # Variables de entorno necesarias para el build
 [variables]
 NODE_ENV = "production"
+NPM_CONFIG_PRODUCTION = "false"
 
 # Comando de inicio
 [start]
