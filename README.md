@@ -14,7 +14,7 @@ Sistema completo de gestión de inscripciones para eventos presenciales con capa
 - 🎨 **Diseño Responsive** optimizado para móviles
 - 🔒 **Autenticación Segura** con JWT
 - 📤 **Exportación de Datos** a CSV
-- 🗄️ **Base de Datos Remota** PostgreSQL en gestsiete.es
+- 🗄️ **Base de Datos Remota** PostgreSQL en server.radioinsular.es
 
 ## 🚀 Inicio Rápido
 
@@ -98,11 +98,11 @@ solaredge-event/
 
 ```env
 # Base de Datos
-DB_HOST=localhost
+DB_HOST=server.radioinsular.es
 DB_PORT=5432
-DB_USER=postgres
-DB_PASSWORD=tu_password
-DB_NAME=solaredge_event
+DB_USER=eventos_u
+DB_PASSWORD=eventos_pass
+DB_NAME=eventos_n
 
 # JWT
 JWT_SECRET=tu_secret_key_segura

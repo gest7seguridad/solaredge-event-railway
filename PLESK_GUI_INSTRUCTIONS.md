@@ -4,7 +4,7 @@
 - **Subdominio**: solarland.gestsiete.es
 - **Carpeta en servidor**: `/solarland.gestsiete.es/`
 - **Tipo de aplicación**: Node.js + React
-- **Base de datos**: PostgreSQL (ya configurada en gestsiete.es)
+- **Base de datos**: PostgreSQL (configurada en server.radioinsular.es)
 
 ---
 

@@ -7,7 +7,7 @@
 - **Editor de texto** para configurar variables
 - **Mínimo 2GB RAM**, 10GB espacio en disco
 
-> ⚠️ **Nota:** La base de datos PostgreSQL está alojada remotamente en gestsiete.es, no necesitas instalar PostgreSQL localmente.
+> ⚠️ **Nota:** La base de datos PostgreSQL está alojada remotamente en server.radioinsular.es, no necesitas instalar PostgreSQL localmente.
 
 ## 📦 Instalación Paso a Paso
 
@@ -35,11 +35,11 @@ nano .env  # o usar tu editor preferido
 # ============================================
 # BASE DE DATOS (Ya configurada - NO CAMBIAR)
 # ============================================
-DB_HOST=gestsiete.es
+DB_HOST=server.radioinsular.es
 DB_PORT=5432
-DB_USER=events_u
-DB_PASSWORD=events_pass$$
-DB_NAME=events_n
+DB_USER=eventos_u
+DB_PASSWORD=eventos_pass
+DB_NAME=eventos_n
 
 # ============================================
 # JWT Secret (CAMBIAR en producción)
@@ -119,7 +119,7 @@ npm run dev
 
 ### Credenciales de Administrador
 - **Email:** admin@solarland.com
-- **Contraseña:** admin123
+- **Contraseña:** admin123456
 
 ⚠️ **IMPORTANTE:** Cambia la contraseña después del primer acceso
 
@@ -251,7 +251,7 @@ pm2 monit
 ### Error de conexión a la base de datos
 ```bash
 # Verificar conexión
-PGPASSWORD='events_pass$$' psql -h gestsiete.es -U events_u -d events_n -c '\dt'
+PGPASSWORD='eventos_pass' psql -h server.radioinsular.es -U eventos_u -d eventos_n -c '\dt'
 ```
 - Verifica las credenciales en `.env`
 - Asegúrate de tener conexión a Internet
@@ -288,10 +288,10 @@ npm run build
 ### Backup de Base de Datos
 ```bash
 # Backup manual
-PGPASSWORD='events_pass$$' pg_dump -h gestsiete.es -U events_u events_n > backup_$(date +%Y%m%d).sql
+PGPASSWORD='eventos_pass' pg_dump -h server.radioinsular.es -U eventos_u eventos_n > backup_$(date +%Y%m%d).sql
 
 # Restaurar backup
-PGPASSWORD='events_pass$$' psql -h gestsiete.es -U events_u -d events_n < backup.sql
+PGPASSWORD='eventos_pass' psql -h server.radioinsular.es -U eventos_u -d eventos_n < backup.sql
 ```
 
 ## 📊 Monitoreo
@@ -331,7 +331,7 @@ grep ERROR backend/logs/app.log
 
 ## 📝 Notas Adicionales
 
-- La base de datos está alojada en gestsiete.es (PostgreSQL remoto)
+- La base de datos está alojada en server.radioinsular.es (PostgreSQL remoto)
 - No necesitas instalar PostgreSQL localmente
 - El sistema incluye rate limiting por defecto
 - Los QR codes se generan automáticamente
