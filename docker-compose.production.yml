@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  # NO necesitamos PostgreSQL local - usamos la BD remota de gestsiete.es
+  
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: solaredge_backend_prod
+    environment:
+      - NODE_ENV=production
+      # Base de datos remota en gestsiete.es
+      - DB_HOST=gestsiete.es
+      - DB_PORT=5432
+      - DB_USER=events_u
+      - DB_PASSWORD=events_pass$$
+      - DB_NAME=events_n
+      # Seguridad
+      - JWT_SECRET=${JWT_SECRET:-SolarEdge2025SecureToken!@#$%gestsiete}
+      # Email
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_SECURE=${SMTP_SECURE}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASS=${SMTP_PASS}
+      - EMAIL_FROM=${EMAIL_FROM}
+      # URLs
+      - FRONTEND_URL=${FRONTEND_URL:-https://events.gestsiete.es}
+    ports:
+      - "5000:5000"
+    networks:
+      - solaredge_network_prod
+    restart: unless-stopped
+    volumes:
+      - ./backend/uploads:/app/uploads
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  frontend:
+    image: nginx:alpine
+    container_name: solaredge_frontend_prod
+    volumes:
+      - ./frontend/dist:/usr/share/nginx/html
+      - ./nginx.production.conf:/etc/nginx/conf.d/default.conf
+      # Para SSL (si tienes certificados)
+      # - ./ssl/cert.pem:/etc/nginx/cert.pem
+      # - ./ssl/key.pem:/etc/nginx/key.pem
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - backend
+    networks:
+      - solaredge_network_prod
+    restart: unless-stopped
+
+networks:
+  solaredge_network_prod:
+    driver: bridge
