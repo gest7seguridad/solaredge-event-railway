@@ -23,8 +23,26 @@ const limiter = rateLimit({
 });
 
 app.use(helmet());
+
+// Configuración CORS para desarrollo y producción
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:5173',
+  'https://solarland.gestsiete.es',
+  process.env.FRONTEND_URL || 'http://localhost:3000'
+].filter(Boolean);
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: (origin, callback) => {
+    // Permitir requests sin origin (Postman, aplicaciones móviles, etc)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
 }));
 app.use(express.json());

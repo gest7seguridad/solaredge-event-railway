@@ -31,7 +31,7 @@ Antes de subir a Plesk, ejecuta el build localmente:
 2. Ir a **"Sitios web y dominios"**
 3. Clic en **"Añadir dominio"** o **"Añadir subdominio"**
 4. Configurar:
-   - Nombre: `events.gestsiete.es` (o tu dominio)
+   - Nombre: `solarland.gestsiete.es`
    - Directorio: `/httpdocs` (por defecto)
 
 ### 1.2 Habilitar SSL
@@ -69,10 +69,10 @@ Archivo de inicio:         backend/dist/server.js
 
 ```bash
 # Conectar por SSH
-ssh tu_usuario@tu_servidor.com
+ssh tu_usuario@gestsiete.es
 
 # Navegar al directorio del dominio
-cd /var/www/vhosts/tu-dominio.com/httpdocs/
+cd /var/www/vhosts/solarland.gestsiete.es/httpdocs/
 
 # Clonar repositorio
 git clone https://github.com/gest7seguridad/Event-System.git .
@@ -94,7 +94,7 @@ chmod -R 755 .
 
 ```bash
 # Conectar con FileZilla o cliente FTP
-Host: ftp.tu-dominio.com
+Host: ftp.solarland.gestsiete.es
 Usuario: tu_usuario_ftp
 Puerto: 21
 
@@ -109,7 +109,7 @@ Puerto: 21
 ### 4.1 Crear archivo .env
 ```bash
 # Por SSH
-cd /var/www/vhosts/tu-dominio.com/httpdocs/
+cd /var/www/vhosts/solarland.gestsiete.es/httpdocs/
 cp .env.example .env
 nano .env
 ```
@@ -135,11 +135,11 @@ SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USER=tu-email@gmail.com
 SMTP_PASS=tu-app-password
-EMAIL_FROM="SolarEdge Event" <noreply@tu-dominio.com>
+EMAIL_FROM="SolarEdge Event" <noreply@solarland.gestsiete.es>
 
 # URLs
-FRONTEND_URL=https://tu-dominio.com
-BACKEND_URL=https://tu-dominio.com
+FRONTEND_URL=https://solarland.gestsiete.es
+BACKEND_URL=https://solarland.gestsiete.es
 ```
 
 ### 4.3 Variables en Panel de Plesk
@@ -159,7 +159,7 @@ Añadir cada variable clave:
 ### 5.1 Instalar dependencias y compilar
 ```bash
 # Por SSH en el directorio del dominio
-cd /var/www/vhosts/tu-dominio.com/httpdocs/
+cd /var/www/vhosts/solarland.gestsiete.es/httpdocs/
 
 # Backend
 cd backend
@@ -189,7 +189,7 @@ En Plesk, ir a **"Configuración de Apache & nginx"** del dominio:
 ```nginx
 # Servir archivos estáticos del frontend
 location / {
-    root /var/www/vhosts/tu-dominio.com/httpdocs/frontend/dist;
+    root /var/www/vhosts/solarland.gestsiete.es/httpdocs/frontend/dist;
     try_files $uri $uri/ /index.html;
     expires 1d;
     add_header Cache-Control "public, immutable";
@@ -266,9 +266,9 @@ curl http://127.0.0.1:3000/api/health
 ## ✅ Paso 8: Verificación Final
 
 ### URLs para verificar:
-- **Frontend:** https://tu-dominio.com
-- **API Health:** https://tu-dominio.com/api/health
-- **Admin Panel:** https://tu-dominio.com/admin
+- **Frontend:** https://solarland.gestsiete.es
+- **API Health:** https://solarland.gestsiete.es/api/health
+- **Admin Panel:** https://solarland.gestsiete.es/admin
 
 ### Credenciales iniciales:
 - Email: `admin@solarland.com`
@@ -282,7 +282,7 @@ curl http://127.0.0.1:3000/api/health
 ps aux | grep node
 
 # Ver logs de Node.js en Plesk
-tail -f /var/www/vhosts/tu-dominio.com/logs/proxy_error_log
+tail -f /var/www/vhosts/solarland.gestsiete.es/logs/proxy_error_log
 
 # Reiniciar desde Plesk
 plesk bin extension --exec nodejs restart.js
@@ -291,11 +291,11 @@ plesk bin extension --exec nodejs restart.js
 ### La aplicación no inicia
 ```bash
 # Verificar archivo de inicio
-ls -la /var/www/vhosts/tu-dominio.com/httpdocs/backend/dist/server.js
+ls -la /var/www/vhosts/solarland.gestsiete.es/httpdocs/backend/dist/server.js
 
 # Verificar permisos
-chown -R tu_usuario:psacln /var/www/vhosts/tu-dominio.com/httpdocs/
-chmod -R 755 /var/www/vhosts/tu-dominio.com/httpdocs/
+chown -R tu_usuario:psacln /var/www/vhosts/solarland.gestsiete.es/httpdocs/
+chmod -R 755 /var/www/vhosts/solarland.gestsiete.es/httpdocs/
 ```
 
 ### Frontend muestra página en blanco
@@ -338,7 +338,7 @@ cd backend && node -e "console.log(process.env.DB_HOST)"
 ### Script de actualización (`update.sh`):
 ```bash
 #!/bin/bash
-cd /var/www/vhosts/tu-dominio.com/httpdocs/
+cd /var/www/vhosts/solarland.gestsiete.es/httpdocs/
 
 # Backup
 tar -czf backup-$(date +%Y%m%d).tar.gz backend/dist frontend/dist
