@@ -1,0 +1,227 @@
+# ===========================================
+# CONFIGURACIÓN APACHE PARA PLESK - NODE.JS APP
+# ===========================================
+
+# Habilitar motor de reescritura
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+
+    # Forzar HTTPS
+    RewriteCond %{HTTPS} off
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
+
+    # Redirigir www a non-www
+    RewriteCond %{HTTP_HOST} ^www\.(.*)$ [NC]
+    RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
+
+    # ===========================================
+    # PROXY PARA API BACKEND (Node.js en puerto 3000)
+    # ===========================================
+
+    # Todas las rutas /api/* van al backend Node.js
+    RewriteCond %{REQUEST_URI} ^/api
+    RewriteRule ^api/(.*)$ http://127.0.0.1:3000/api/$1 [P,L]
+
+    # Health check endpoint
+    RewriteRule ^health$ http://127.0.0.1:3000/api/health [P,L]
+
+    # ===========================================
+    # SERVIR FRONTEND REACT (SPA)
+    # ===========================================
+
+    # No procesar archivos que existen físicamente
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # Assets del frontend (CSS, JS, imágenes)
+    RewriteCond %{REQUEST_URI} ^/(css|js|img|fonts|static)/
+    RewriteRule ^(.*)$ /frontend/dist/$1 [L]
+
+    # Manifest y archivos especiales de React
+    RewriteRule ^(manifest\.json|favicon\.ico|robots\.txt)$ /frontend/dist/$1 [L]
+
+    # Todas las demás rutas van al index.html de React (SPA routing)
+    RewriteCond %{REQUEST_URI} !^/api
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^.*$ /frontend/dist/index.html [L]
+</IfModule>
+
+# ===========================================
+# COMPRESIÓN GZIP
+# ===========================================
+<IfModule mod_deflate.c>
+    # Comprimir HTML, CSS, JavaScript, Text, XML y fonts
+    AddOutputFilterByType DEFLATE application/javascript
+    AddOutputFilterByType DEFLATE application/json
+    AddOutputFilterByType DEFLATE application/rss+xml
+    AddOutputFilterByType DEFLATE application/vnd.ms-fontobject
+    AddOutputFilterByType DEFLATE application/x-font
+    AddOutputFilterByType DEFLATE application/x-font-opentype
+    AddOutputFilterByType DEFLATE application/x-font-otf
+    AddOutputFilterByType DEFLATE application/x-font-truetype
+    AddOutputFilterByType DEFLATE application/x-font-ttf
+    AddOutputFilterByType DEFLATE application/x-javascript
+    AddOutputFilterByType DEFLATE application/xhtml+xml
+    AddOutputFilterByType DEFLATE application/xml
+    AddOutputFilterByType DEFLATE font/opentype
+    AddOutputFilterByType DEFLATE font/otf
+    AddOutputFilterByType DEFLATE font/ttf
+    AddOutputFilterByType DEFLATE image/svg+xml
+    AddOutputFilterByType DEFLATE image/x-icon
+    AddOutputFilterByType DEFLATE text/css
+    AddOutputFilterByType DEFLATE text/html
+    AddOutputFilterByType DEFLATE text/javascript
+    AddOutputFilterByType DEFLATE text/plain
+    AddOutputFilterByType DEFLATE text/xml
+
+    # Remover bugs de browsers antiguos
+    BrowserMatch ^Mozilla/4 gzip-only-text/html
+    BrowserMatch ^Mozilla/4\.0[678] no-gzip
+    BrowserMatch \bMSIE !no-gzip !gzip-only-text/html
+    Header append Vary User-Agent
+</IfModule>
+
+# ===========================================
+# CACHE DE NAVEGADOR
+# ===========================================
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresDefault "access plus 1 month"
+
+    # HTML - sin cache
+    ExpiresByType text/html "access plus 0 seconds"
+
+    # Data
+    ExpiresByType application/json "access plus 0 seconds"
+    ExpiresByType application/xml "access plus 0 seconds"
+    ExpiresByType text/xml "access plus 0 seconds"
+
+    # Feed
+    ExpiresByType application/atom+xml "access plus 1 hour"
+    ExpiresByType application/rss+xml "access plus 1 hour"
+
+    # Favicon
+    ExpiresByType image/x-icon "access plus 1 year"
+
+    # Media: images, video, audio
+    ExpiresByType audio/ogg "access plus 1 month"
+    ExpiresByType image/gif "access plus 1 month"
+    ExpiresByType image/jpeg "access plus 1 month"
+    ExpiresByType image/png "access plus 1 month"
+    ExpiresByType video/mp4 "access plus 1 month"
+    ExpiresByType video/ogg "access plus 1 month"
+    ExpiresByType video/webm "access plus 1 month"
+    ExpiresByType image/svg+xml "access plus 1 month"
+
+    # Fonts
+    ExpiresByType application/vnd.ms-fontobject "access plus 1 year"
+    ExpiresByType font/ttf "access plus 1 year"
+    ExpiresByType font/otf "access plus 1 year"
+    ExpiresByType font/woff "access plus 1 year"
+    ExpiresByType font/woff2 "access plus 1 year"
+
+    # CSS y JavaScript
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType text/javascript "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+</IfModule>
+
+# ===========================================
+# HEADERS DE SEGURIDAD
+# ===========================================
+<IfModule mod_headers.c>
+    # Protección XSS
+    Header set X-XSS-Protection "1; mode=block"
+
+    # Prevenir MIME type sniffing
+    Header set X-Content-Type-Options "nosniff"
+
+    # Clickjacking Protection
+    Header set X-Frame-Options "SAMEORIGIN"
+
+    # Referrer Policy
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+
+    # Permisos de features
+    Header set Permissions-Policy "camera=(), microphone=(), geolocation=(), interest-cohort=()"
+
+    # HSTS (descomentar cuando SSL esté configurado correctamente)
+    # Header set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+
+    # Remover header de servidor
+    Header unset Server
+    Header unset X-Powered-By
+</IfModule>
+
+# ===========================================
+# PROTECCIÓN DE ARCHIVOS SENSIBLES
+# ===========================================
+
+# Bloquear acceso a .env
+<FilesMatch "^\.env">
+    Require all denied
+</FilesMatch>
+
+# Bloquear acceso a archivos de configuración
+<FilesMatch "\.(json|lock|md|sh|sql|yml|yaml|toml)$">
+    Require all denied
+</FilesMatch>
+
+# Bloquear acceso a directorios sensibles
+<IfModule mod_rewrite.c>
+    RewriteRule ^(\.git|node_modules|src|backend/src|tests?)/ - [F,L]
+</IfModule>
+
+# ===========================================
+# LÍMITES Y TIMEOUTS
+# ===========================================
+
+# Aumentar límites para uploads
+<IfModule mod_php7.c>
+    php_value upload_max_filesize 10M
+    php_value post_max_size 10M
+    php_value max_execution_time 300
+    php_value max_input_time 300
+</IfModule>
+
+# ===========================================
+# CORS HEADERS (si es necesario)
+# ===========================================
+<IfModule mod_headers.c>
+    # Permitir CORS solo para el dominio específico
+    SetEnvIf Origin "^https://(www\.)?solarland\.gestsiete\.es$" AccessControlAllowOrigin=$0
+    Header set Access-Control-Allow-Origin %{AccessControlAllowOrigin}e env=AccessControlAllowOrigin
+    Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+    Header set Access-Control-Allow-Headers "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+    Header set Access-Control-Allow-Credentials "true"
+</IfModule>
+
+# ===========================================
+# OPTIMIZACIONES ADICIONALES
+# ===========================================
+
+# ETags
+FileETag MTime Size
+
+# Keep-Alive
+<IfModule mod_headers.c>
+    Header set Connection keep-alive
+</IfModule>
+
+# Deshabilitar directory browsing
+Options -Indexes
+
+# UTF-8 encoding
+AddDefaultCharset utf-8
+
+# Tipos MIME correctos
+<IfModule mod_mime.c>
+    AddType application/javascript js mjs
+    AddType application/json json
+    AddType font/woff woff
+    AddType font/woff2 woff2
+    AddType image/svg+xml svg svgz
+</IfModule>
