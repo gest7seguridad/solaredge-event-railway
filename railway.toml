@@ -8,6 +8,8 @@ restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 10
 healthcheckPath = "/api/health"
 healthcheckTimeout = 30
+# NO ejecutar migraciones automáticamente
+skipReleaseCommand = true
 
 [build.environment]
 NODE_ENV = "production"

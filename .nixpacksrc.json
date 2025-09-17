@@ -1,0 +1,13 @@
+{
+  "providers": ["node"],
+  "buildPlan": {
+    "phases": {
+      "build": {
+        "cmds": ["chmod +x railway-build.sh && ./railway-build.sh"]
+      }
+    }
+  },
+  "start": {
+    "cmd": "node backend/dist/server.js"
+  }
+}
