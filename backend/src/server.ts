@@ -73,74 +73,69 @@ app.get('/api/health', (req, res) => {
 if (process.env.NODE_ENV === 'production') {
   const fs = require('fs');
   
-  // Ruta principal donde debería estar el frontend en Railway
-  const frontendPath = '/app/frontend/dist';
+  // Buscar frontend en múltiples ubicaciones posibles
+  const possiblePaths = [
+    path.join(__dirname, '../public'),        // Backend public (donde lo copiamos)
+    '/app/backend/public',                     // Ruta absoluta en Railway
+    path.join(__dirname, '../../frontend/dist'), // Ruta original
+    '/app/frontend/dist'                       // Ruta original en Railway
+  ];
   
-  console.log('📁 Verificando frontend en:', frontendPath);
-  console.log('📂 Existe el directorio?:', fs.existsSync(frontendPath));
+  let frontendPath = null;
+  let frontendFound = false;
   
-  if (fs.existsSync(frontendPath)) {
+  console.log('🔍 Buscando frontend en posibles ubicaciones...');
+  
+  for (const testPath of possiblePaths) {
+    console.log(`  Verificando: ${testPath}`);
+    if (fs.existsSync(testPath)) {
+      const indexPath = path.join(testPath, 'index.html');
+      if (fs.existsSync(indexPath)) {
+        frontendPath = testPath;
+        frontendFound = true;
+        console.log(`  ✅ Frontend encontrado en: ${testPath}`);
+        break;
+      } else {
+        console.log(`  📁 Directorio existe pero sin index.html`);
+      }
+    } else {
+      console.log(`  ❌ No existe`);
+    }
+  }
+  
+  if (frontendFound && frontendPath) {
     const indexPath = path.join(frontendPath, 'index.html');
-    console.log('📄 Existe index.html?:', fs.existsSync(indexPath));
     
-    if (fs.existsSync(indexPath)) {
-      // Configurar Express para servir archivos estáticos
-      console.log('✅ Configurando servidor de archivos estáticos...');
+    // Configurar Express para servir archivos estáticos
+    console.log('✅ Configurando servidor de archivos estáticos...');
+    
+    // IMPORTANTE: Servir archivos estáticos ANTES de las rutas catch-all
+    app.use(express.static(frontendPath));
+    
+    // Manejar rutas de React Router - DEBE ir DESPUÉS de express.static
+    app.get('*', (req, res, next) => {
+      // No procesar rutas API
+      if (req.path.startsWith('/api')) {
+        return next();
+      }
       
-      // IMPORTANTE: Servir archivos estáticos ANTES de las rutas catch-all
-      app.use(express.static(frontendPath));
-      
-      // Manejar rutas de React Router - DEBE ir DESPUÉS de express.static
-      app.get('*', (req, res, next) => {
-        // No procesar rutas API
-        if (req.path.startsWith('/api')) {
-          return next();
-        }
-        
-        // Enviar index.html para todas las demás rutas
-        res.sendFile(indexPath);
-      });
-      
-      console.log('✅ Frontend configurado correctamente');
-    } else {
-      console.log('❌ index.html no encontrado');
-      // Listar contenido del directorio para debugging
-      const files = fs.readdirSync(frontendPath);
-      console.log('📁 Archivos en frontend/dist:', files);
-      
-      app.get('*', (req, res) => {
-        if (req.path.startsWith('/api')) return;
-        res.status(404).json({
-          error: 'index.html no encontrado',
-          path: indexPath,
-          files: files
-        });
-      });
-    }
+      // Enviar index.html para todas las demás rutas
+      res.sendFile(indexPath);
+    });
+    
+    console.log('✅ Frontend configurado correctamente desde:', frontendPath);
   } else {
-    console.log('❌ Directorio frontend no encontrado');
+    console.log('❌ Frontend no encontrado en ninguna ubicación');
     
-    // Fallback: intentar con ruta relativa
-    const relativePath = path.join(__dirname, '../../frontend/dist');
-    if (fs.existsSync(relativePath)) {
-      console.log('📁 Usando ruta relativa:', relativePath);
-      app.use(express.static(relativePath));
-      app.get('*', (req, res, next) => {
-        if (req.path.startsWith('/api')) return next();
-        res.sendFile(path.join(relativePath, 'index.html'));
+    app.get('*', (req, res) => {
+      if (req.path.startsWith('/api')) return;
+      res.status(404).json({
+        error: 'Frontend no encontrado',
+        checkedPaths: possiblePaths,
+        cwd: process.cwd(),
+        dirname: __dirname
       });
-    } else {
-      app.get('*', (req, res) => {
-        if (req.path.startsWith('/api')) return;
-        res.status(404).json({
-          error: 'Frontend no encontrado',
-          intentedPath: frontendPath,
-          relativePath: relativePath,
-          cwd: process.cwd(),
-          dirname: __dirname
-        });
-      });
-    }
+    });
   }
 }
 
