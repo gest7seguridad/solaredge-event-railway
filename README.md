@@ -14,20 +14,23 @@ Sistema completo de gestión de inscripciones para eventos presenciales con capa
 - 🎨 **Diseño Responsive** optimizado para móviles
 - 🔒 **Autenticación Segura** con JWT
 - 📤 **Exportación de Datos** a CSV
+- 🗄️ **Base de Datos Remota** PostgreSQL en gestsiete.es
 
 ## 🚀 Inicio Rápido
 
-### Con Docker (Recomendado)
 ```bash
-# 1. Configurar variables de entorno
-cp .env.production .env
-nano .env
+# 1. Clonar el repositorio
+git clone https://github.com/gest7seguridad/Event-System.git
+cd Event-System
 
-# 2. Iniciar todos los servicios
+# 2. Configurar variables de entorno
+cp .env.example .env
+nano .env  # Editar con tus credenciales SMTP
+
+# 3. Instalar y ejecutar
 ./start.sh
 ```
 
-### Instalación Manual
 Ver [INSTALACION.md](./INSTALACION.md) para instrucciones detalladas.
 
 ## 📁 Estructura del Proyecto
@@ -37,17 +40,17 @@ solaredge-event/
 ├── backend/              # API REST con Node.js + TypeScript
 │   ├── src/             # Código fuente
 │   ├── dist/            # Código compilado
-│   └── Dockerfile       # Configuración Docker
+│   └── package.json     # Dependencias del backend
 ├── frontend/            # Aplicación React + TypeScript
 │   ├── src/            # Código fuente
 │   ├── dist/           # Build de producción
-│   └── public/         # Archivos estáticos
-├── database_backup.sql  # Backup de la base de datos
-├── docker-compose.yml   # Orquestación de servicios
-├── nginx.conf          # Configuración del proxy
-├── .env.production     # Variables de entorno (ejemplo)
+│   └── package.json    # Dependencias del frontend
+├── database_backup.sql  # Estructura de la base de datos
+├── .env.example        # Variables de entorno de ejemplo
 ├── start.sh           # Script de inicio rápido
+├── migrate-to-remote.sh # Script de migración de BD
 ├── INSTALACION.md     # Guía de instalación completa
+├── DEPLOY_PLESK.md    # Guía para Plesk
 └── README.md          # Este archivo
 ```
 
