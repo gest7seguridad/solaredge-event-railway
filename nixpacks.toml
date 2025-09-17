@@ -5,24 +5,16 @@
 [phases.setup]
 nixPkgs = ["nodejs-18_x"]
 
-# Instalar dependencias y compilar en un solo paso
+# Usar script de build optimizado
 [phases.build]
-cmds = [
-  "echo '📦 Installing backend dependencies...'",
-  "cd backend && npm install --production=false",
-  "echo '🔨 Building backend...'",
-  "npm run build",
-  "echo '📦 Installing frontend dependencies...'",
-  "cd ../frontend && npm install --production=false",
-  "echo '🎨 Building frontend...'",
-  "npm run build",
-  "echo '✅ Build completed!'"
-]
+cmds = ["chmod +x railway-build.sh && ./railway-build.sh"]
 
 # Variables de entorno necesarias para el build
 [variables]
 NODE_ENV = "production"
 NPM_CONFIG_PRODUCTION = "false"
+PUPPETEER_SKIP_DOWNLOAD = "true"
+PUPPETEER_SKIP_CHROMIUM_DOWNLOAD = "true"
 
 # Comando de inicio
 [start]

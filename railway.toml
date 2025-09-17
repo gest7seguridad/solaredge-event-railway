@@ -1,6 +1,6 @@
 [build]
 builder = "nixpacks"
-buildCommand = "cd backend && npm install --production=false && npm run build && cd ../frontend && npm install --production=false && npm run build"
+buildCommand = "chmod +x railway-build.sh && ./railway-build.sh"
 
 [deploy]
 startCommand = "node backend/dist/server.js"
@@ -12,3 +12,5 @@ healthcheckTimeout = 30
 [build.environment]
 NODE_ENV = "production"
 NPM_CONFIG_PRODUCTION = "false"
+PUPPETEER_SKIP_DOWNLOAD = "true"
+PUPPETEER_SKIP_CHROMIUM_DOWNLOAD = "true"
