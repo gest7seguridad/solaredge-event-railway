@@ -8,7 +8,7 @@ La aplicación no está ejecutándose correctamente en Plesk debido a la configu
 ### 1. Conectar por SSH al servidor
 ```bash
 ssh tu_usuario@gestsiete.es
-cd /var/www/vhosts/solarland.gestsiete.es/httpdocs/
+cd /var/www/vhosts/gestsiete.es/solarland.gestsiete.es/
 ```
 
 ### 2. Verificar estructura de archivos
@@ -70,7 +70,7 @@ cd ..
 2. **Configuración correcta:**
    ```
    Versión de Node.js:         18.x (o superior)
-   Raíz del documento:         /httpdocs
+   Raíz del documento:         /solarland.gestsiete.es
    Modo de aplicación:         production
    Archivo de inicio:          app.js
    ```
@@ -96,7 +96,7 @@ En **Configuración de Apache & nginx** → **Configuración adicional de nginx*
 ```nginx
 # IMPORTANTE: Servir el frontend estático, NO el backend
 location / {
-    root /var/www/vhosts/solarland.gestsiete.es/httpdocs/frontend/dist;
+    root /var/www/vhosts/gestsiete.es/solarland.gestsiete.es/frontend/dist;
     try_files $uri $uri/ /index.html;
     
     # Headers de caché para archivos estáticos
@@ -170,7 +170,7 @@ module.exports = {
   apps: [{
     name: 'solarland-backend',
     script: './backend/dist/server.js',
-    cwd: '/var/www/vhosts/solarland.gestsiete.es/httpdocs',
+    cwd: '/var/www/vhosts/gestsiete.es/solarland.gestsiete.es',
     instances: 1,
     exec_mode: 'fork',
     env: {
@@ -198,8 +198,8 @@ Si Plesk usa Phusion Passenger, crear archivo `passenger-standalone.json`:
   "daemonize": true,
   "user": "tu_usuario",
   "instance_registry_dir": "/var/run/passenger-instreg",
-  "log_file": "/var/www/vhosts/solarland.gestsiete.es/logs/passenger.log",
-  "pid_file": "/var/www/vhosts/solarland.gestsiete.es/passenger.pid",
+  "log_file": "/var/www/vhosts/gestsiete.es/solarland.gestsiete.es/logs/passenger.log",
+  "pid_file": "/var/www/vhosts/gestsiete.es/solarland.gestsiete.es/passenger.pid",
   "startup_file": "app.js"
 }
 ```

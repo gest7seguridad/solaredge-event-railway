@@ -58,8 +58,8 @@ Antes de subir a Plesk, ejecuta el build localmente:
 ```
 Versión de Node.js:        18.x (o la más reciente disponible)
 Modo de aplicación:        production
-Raíz del documento:        /httpdocs
-Directorio de aplicación:  /httpdocs
+Raíz del documento:        /solarland.gestsiete.es
+Directorio de aplicación:  /solarland.gestsiete.es
 Archivo de inicio:         app.js
 ```
 
@@ -72,7 +72,7 @@ Archivo de inicio:         app.js
 ssh tu_usuario@gestsiete.es
 
 # Navegar al directorio del dominio
-cd /var/www/vhosts/solarland.gestsiete.es/httpdocs/
+cd /var/www/vhosts/gestsiete.es/solarland.gestsiete.es/
 
 # Clonar repositorio
 git clone https://github.com/gest7seguridad/Event-System.git .
@@ -109,7 +109,7 @@ Puerto: 21
 ### 4.1 Crear archivo .env
 ```bash
 # Por SSH
-cd /var/www/vhosts/solarland.gestsiete.es/httpdocs/
+cd /var/www/vhosts/gestsiete.es/solarland.gestsiete.es/
 cp .env.example .env
 nano .env
 ```
@@ -159,7 +159,7 @@ Añadir cada variable clave:
 ### 5.1 Instalar dependencias y compilar
 ```bash
 # Por SSH en el directorio del dominio
-cd /var/www/vhosts/solarland.gestsiete.es/httpdocs/
+cd /var/www/vhosts/gestsiete.es/solarland.gestsiete.es/
 
 # Backend
 cd backend
@@ -189,7 +189,7 @@ En Plesk, ir a **"Configuración de Apache & nginx"** del dominio:
 ```nginx
 # Servir archivos estáticos del frontend
 location / {
-    root /var/www/vhosts/solarland.gestsiete.es/httpdocs/frontend/dist;
+    root /var/www/vhosts/gestsiete.es/solarland.gestsiete.es/frontend/dist;
     try_files $uri $uri/ /index.html;
     expires 1d;
     add_header Cache-Control "public, immutable";
@@ -286,7 +286,7 @@ Ver archivo [FIX_PLESK_ERROR.md](./FIX_PLESK_ERROR.md) para solución detallada.
 ps aux | grep node
 
 # Ver logs de Node.js en Plesk
-tail -f /var/www/vhosts/solarland.gestsiete.es/logs/proxy_error_log
+tail -f /var/www/vhosts/gestsiete.es/solarland.gestsiete.es/logs/proxy_error_log
 
 # Reiniciar desde Plesk
 plesk bin extension --exec nodejs restart.js
@@ -295,11 +295,11 @@ plesk bin extension --exec nodejs restart.js
 ### La aplicación no inicia
 ```bash
 # Verificar archivo de inicio
-ls -la /var/www/vhosts/solarland.gestsiete.es/httpdocs/backend/dist/server.js
+ls -la /var/www/vhosts/gestsiete.es/solarland.gestsiete.es/backend/dist/server.js
 
 # Verificar permisos
-chown -R tu_usuario:psacln /var/www/vhosts/solarland.gestsiete.es/httpdocs/
-chmod -R 755 /var/www/vhosts/solarland.gestsiete.es/httpdocs/
+chown -R tu_usuario:psacln /var/www/vhosts/gestsiete.es/solarland.gestsiete.es/
+chmod -R 755 /var/www/vhosts/gestsiete.es/solarland.gestsiete.es/
 ```
 
 ### Frontend muestra página en blanco
@@ -342,7 +342,7 @@ cd backend && node -e "console.log(process.env.DB_HOST)"
 ### Script de actualización (`update.sh`):
 ```bash
 #!/bin/bash
-cd /var/www/vhosts/solarland.gestsiete.es/httpdocs/
+cd /var/www/vhosts/gestsiete.es/solarland.gestsiete.es/
 
 # Backup
 tar -czf backup-$(date +%Y%m%d).tar.gz backend/dist frontend/dist
