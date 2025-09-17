@@ -1,0 +1,129 @@
+# ===========================================
+# CONFIGURACIÓN APACHE CORREGIDA PARA PLESK
+# ===========================================
+
+# Desactivar MultiViews para evitar conflictos
+Options -MultiViews
+
+# Habilitar motor de reescritura
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # IMPORTANTE: No usar RewriteBase con subdominios
+    # RewriteBase /
+
+    # ===========================================
+    # ARCHIVOS ESTÁTICOS DEL FRONTEND
+    # ===========================================
+
+    # Servir archivos que existen directamente
+    RewriteCond %{REQUEST_FILENAME} -f
+    RewriteRule ^ - [L]
+
+    # Assets del frontend (js, css, imágenes)
+    RewriteRule ^(assets|static|js|css|img|fonts)/(.*)$ frontend/dist/$1/$2 [L]
+
+    # Archivos especiales en la raíz
+    RewriteRule ^(favicon\.ico|favicon\.svg|manifest\.json|robots\.txt)$ frontend/dist/$1 [L]
+
+    # ===========================================
+    # PROXY PARA API (Node.js)
+    # ===========================================
+
+    # SOLO si mod_proxy está habilitado
+    <IfModule mod_proxy.c>
+        # Health check
+        RewriteRule ^health$ http://127.0.0.1:3000/api/health [P,L]
+
+        # Todas las rutas API
+        RewriteRule ^api/(.*)$ http://127.0.0.1:3000/api/$1 [P,L]
+    </IfModule>
+
+    # ALTERNATIVA si mod_proxy NO está disponible
+    # (Redirigir al puerto de Node.js - menos ideal)
+    <IfModule !mod_proxy.c>
+        RewriteCond %{REQUEST_URI} ^/api
+        RewriteRule ^api/(.*)$ http://127.0.0.1:3000/api/$1 [R=307,L]
+    </IfModule>
+
+    # ===========================================
+    # REACT ROUTER (SPA)
+    # ===========================================
+
+    # Para todas las demás rutas, servir index.html
+    RewriteCond %{REQUEST_URI} !^/api
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^.*$ frontend/dist/index.html [L]
+</IfModule>
+
+# ===========================================
+# DIRECTORYINDEX
+# ===========================================
+DirectoryIndex frontend/dist/index.html index.html
+
+# ===========================================
+# MIME TYPES CORRECTOS
+# ===========================================
+<IfModule mod_mime.c>
+    AddType application/javascript .js .mjs
+    AddType text/css .css
+    AddType image/svg+xml .svg
+    AddType application/json .json
+    AddType application/manifest+json .webmanifest .manifest
+</IfModule>
+
+# ===========================================
+# HEADERS DE SEGURIDAD BÁSICOS
+# ===========================================
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set X-XSS-Protection "1; mode=block"
+</IfModule>
+
+# ===========================================
+# CACHE PARA ASSETS
+# ===========================================
+<IfModule mod_expires.c>
+    ExpiresActive On
+
+    # HTML - sin cache
+    ExpiresByType text/html "access plus 0 seconds"
+
+    # CSS y JavaScript - 1 mes
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+
+    # Imágenes - 1 año
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType image/svg+xml "access plus 1 year"
+    ExpiresByType image/x-icon "access plus 1 year"
+</IfModule>
+
+# ===========================================
+# COMPRESIÓN
+# ===========================================
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/css application/javascript application/json
+</IfModule>
+
+# ===========================================
+# PROTECCIÓN DE ARCHIVOS SENSIBLES
+# ===========================================
+<FilesMatch "\.(env|json|lock|md|yml|yaml|sh|sql)$">
+    Require all denied
+</FilesMatch>
+
+# ===========================================
+# DESHABILITAR DIRECTORY LISTING
+# ===========================================
+Options -Indexes
+
+# ===========================================
+# ERROR HANDLING
+# ===========================================
+ErrorDocument 404 /frontend/dist/index.html
+ErrorDocument 500 "Internal Server Error - Please check server logs"
