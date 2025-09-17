@@ -47,4 +47,10 @@ uploads/
 
 # Package files
 *.tar.gz
-*.zipEvent-System/
+*.zip
+
+# Event-System folder
+Event-System/
+
+# Railway
+.railway/

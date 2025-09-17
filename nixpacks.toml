@@ -1,0 +1,29 @@
+# Configuración de Nixpacks para Railway
+# https://nixpacks.com/docs/configuration/file
+
+# Proveedor y versión de Node.js
+[phases.setup]
+nixPkgs = ["nodejs-18_x", "postgresql"]
+
+# Instalar todas las dependencias incluyendo TypeScript
+[phases.install]
+cmds = [
+  "npm install",
+  "cd backend && npm install",
+  "cd frontend && npm install"
+]
+
+# Compilar backend y frontend
+[phases.build]
+cmds = [
+  "cd backend && npm run build",
+  "cd frontend && npm run build"
+]
+
+# Variables de entorno necesarias para el build
+[variables]
+NODE_ENV = "production"
+
+# Comando de inicio
+[start]
+cmd = "node backend/dist/server.js"

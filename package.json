@@ -2,23 +2,28 @@
   "name": "solaredge-event-registration",
   "version": "1.0.0",
   "description": "Sistema de inscripción para evento presencial SolarEdge - Solarland",
-  "main": "app.js",
+  "main": "backend/dist/server.js",
   "scripts": {
-    "start": "node app.js",
+    "start": "node backend/dist/server.js",
+    "start:production": "node backend/dist/server.js",
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "dev:backend": "cd backend && npm run dev",
     "dev:frontend": "cd frontend && npm run dev",
-    "build": "npm run build:backend && npm run build:frontend",
+    "build": "npm run install:all && npm run build:backend && npm run build:frontend",
+    "build:railway": "npm run install:all && npm run build:backend && npm run build:frontend",
     "build:backend": "cd backend && npm run build",
     "build:frontend": "cd frontend && npm run build",
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install && cd ..",
     "test": "npm run test:backend && npm run test:frontend",
     "test:backend": "cd backend && npm test",
     "test:frontend": "cd frontend && npm test",
     "db:migrate": "cd backend && npm run db:migrate",
-    "db:seed": "cd backend && npm run db:seed"
+    "db:seed": "cd backend && npm run db:seed",
+    "postinstall": "npm run install:all"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
   },
   "dependencies": {
     "dotenv": "^16.6.1"
