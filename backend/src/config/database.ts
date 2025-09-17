@@ -1,7 +1,8 @@
 import knex from 'knex';
+import { getKnexConfig } from './db-config';
 
-const environment = process.env.NODE_ENV || 'development';
-const config = require('../../knexfile')[environment];
+// Usar la configuración con fallback para Railway
+const config = getKnexConfig();
 
 export const db = knex(config);
 

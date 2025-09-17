@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
+import path from 'path';
 import rateLimit from 'express-rate-limit';
 import { testConnection } from './config/database';
 import { errorHandler } from './middleware/errorHandler';
@@ -11,7 +12,16 @@ import registrationRoutes from './routes/registrationRoutes';
 import adminRoutes from './routes/adminRoutes';
 import configRoutes from './routes/configRoutes';
 
-dotenv.config();
+// Cargar variables de entorno desde la raíz del proyecto
+dotenv.config({ path: path.join(__dirname, '../../.env') });
+
+// Log de las variables de entorno para debugging
+console.log('🔍 Environment variables check:');
+console.log('   NODE_ENV:', process.env.NODE_ENV);
+console.log('   DB_HOST:', process.env.DB_HOST || 'NOT SET ❌');
+console.log('   DB_USER:', process.env.DB_USER || 'NOT SET ❌');
+console.log('   DB_NAME:', process.env.DB_NAME || 'NOT SET ❌');
+console.log('   PORT:', process.env.PORT || 5000);
 
 const app = express();
 const PORT = process.env.PORT || 5000;
