@@ -60,7 +60,7 @@ Versión de Node.js:        18.x (o la más reciente disponible)
 Modo de aplicación:        production
 Raíz del documento:        /httpdocs
 Directorio de aplicación:  /httpdocs
-Archivo de inicio:         backend/dist/server.js
+Archivo de inicio:         app.js
 ```
 
 ## 📂 Paso 3: Subir Archivos
@@ -243,9 +243,9 @@ Header set Referrer-Policy "strict-origin-when-cross-origin"
 ### 7.1 En el panel de Node.js de Plesk:
 
 1. Verificar configuración:
-   - **Archivo de inicio:** `backend/dist/server.js`
+   - **Archivo de inicio:** `app.js`
    - **Modo:** `production`
-   - **Puerto:** Dejar que Node.js lo asigne
+   - **Puerto:** Dejar que Node.js lo asigne o usar 3000
 
 2. Clic en **"Reiniciar aplicación"**
 
@@ -262,6 +262,10 @@ curl http://127.0.0.1:3000/api/health
 # Debe responder:
 # {"status":"OK","timestamp":"..."}
 ```
+
+## ⚠️ IMPORTANTE: Si aparece error de Phusion Passenger
+
+Ver archivo [FIX_PLESK_ERROR.md](./FIX_PLESK_ERROR.md) para solución detallada.
 
 ## ✅ Paso 8: Verificación Final
 
@@ -393,7 +397,7 @@ En Plesk → Configuración de hosting → Habilitar HTTP/2
 ## 📝 Checklist Final
 
 - [ ] Node.js 18+ configurado en Plesk
-- [ ] Archivo de inicio: `backend/dist/server.js`
+- [ ] Archivo de inicio: `app.js` en la raíz
 - [ ] Variables de entorno configuradas
 - [ ] Backend compilado (`npm run build`)
 - [ ] Frontend compilado (`npm run build`)
