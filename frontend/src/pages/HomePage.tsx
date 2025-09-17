@@ -4,7 +4,8 @@ import { useQuery } from 'react-query'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import Countdown from 'react-countdown'
-import { FaCalendar, FaClock, FaMapMarkerAlt, FaParking, FaUsers, FaCheckCircle } from 'react-icons/fa'
+import { FaCalendar, FaClock, FaMapMarkerAlt, FaParking, FaUsers, FaCheckCircle, FaUserShield } from 'react-icons/fa'
+import { useNavigate } from 'react-router-dom'
 import { eventService } from '../services/api'
 import RegistrationForm from '../components/RegistrationForm'
 import EventAgenda from '../components/EventAgenda'
@@ -14,6 +15,7 @@ const HomePage = () => {
   const [showForm, setShowForm] = useState(false)
   const [organizerLogo, setOrganizerLogo] = useState<string>('/logos/solarland-logo.png')
   const [collaboratorLogo, setCollaboratorLogo] = useState<string>('/logos/solaredge-logo.png')
+  const navigate = useNavigate()
 
   const { data, isLoading, error } = useQuery(
     'currentEvent',
@@ -50,6 +52,16 @@ const HomePage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+      {/* Botón discreto de acceso admin - esquina superior derecha */}
+      <button
+        onClick={() => navigate('/admin')}
+        className="fixed top-4 right-4 z-50 p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-all duration-200 opacity-30 hover:opacity-100"
+        title="Acceso Administración"
+        aria-label="Acceso panel de administración"
+      >
+        <FaUserShield className="text-gray-600 text-lg" />
+      </button>
+      
       {/* Hero Section */}
       <motion.section 
         initial={{ opacity: 0 }}
