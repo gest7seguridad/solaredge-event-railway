@@ -1,172 +1,201 @@
-# 🚀 Guía de Despliegue en Plesk con Node.js
+# 🚀 Guía de Despliegue en Plesk Onyx con Node.js
 
 ## 📋 Requisitos Previos
 
-### En el servidor Plesk:
-- Plesk Obsidian 18.0+ 
-- Extensión Node.js instalada
-- PostgreSQL disponible (usaremos BD remota)
-- Acceso SSH al servidor
-- Dominio configurado en Plesk
+### En el servidor Plesk Onyx:
+- **Plesk Onyx 17.8+** (versión mínima)
+- **Extensión Node.js** instalada desde el catálogo
+- **Git** instalado en el servidor
+- **Acceso SSH** al servidor
+- **Dominio/Subdominio** configurado en Plesk
 
-## 🔧 Paso 1: Preparar el Dominio en Plesk
+> ⚠️ **Importante:** La base de datos PostgreSQL está en gestsiete.es (remota), NO necesitas configurar base de datos en Plesk.
 
-### 1.1 Crear el dominio/subdominio
-1. Ir a **Sitios web y dominios**
-2. **Añadir dominio** o **Añadir subdominio**
-3. Crear: `events.gestsiete.es`
+## 🏗️ Script de Build
 
-### 1.2 Habilitar Node.js
-1. En el dominio, ir a **Node.js**
-2. Hacer clic en **Habilitar Node.js**
-3. Configurar:
-   - **Versión Node.js:** 18.x o superior
-   - **Modo de aplicación:** Producción
-   - **Archivo de inicio:** `backend/dist/server.js`
+Antes de subir a Plesk, ejecuta el build localmente:
 
-## 📦 Paso 2: Subir los Archivos
-
-### Opción A: Usando Git (Recomendado)
 ```bash
-# Conectar por SSH al servidor
-ssh usuario@servidor.com
+# En tu máquina local
+./build.sh
 
-# Ir al directorio del dominio
-cd /var/www/vhosts/gestsiete.es/events.gestsiete.es
+# Esto genera:
+# - backend/dist/   (código compilado del servidor)
+# - frontend/dist/  (archivos estáticos del frontend)
+```
 
-# Clonar el repositorio
+## 📦 Paso 1: Configurar Dominio en Plesk
+
+### 1.1 Crear dominio o subdominio
+1. Acceder a Plesk con tu usuario
+2. Ir a **"Sitios web y dominios"**
+3. Clic en **"Añadir dominio"** o **"Añadir subdominio"**
+4. Configurar:
+   - Nombre: `events.gestsiete.es` (o tu dominio)
+   - Directorio: `/httpdocs` (por defecto)
+
+### 1.2 Habilitar SSL
+1. En el dominio, ir a **"Certificados SSL/TLS"**
+2. Instalar **Let's Encrypt** (gratis):
+   - Email: tu-email@dominio.com
+   - Marcar: Incluir dominio con y sin www
+3. Clic en **"Instalar"**
+
+## 📱 Paso 2: Configurar Node.js en Plesk Onyx
+
+### 2.1 Instalar extensión Node.js (si no está)
+1. Ir a **"Extensiones"** → **"Catálogo de extensiones"**
+2. Buscar **"Node.js"**
+3. Instalar la extensión
+
+### 2.2 Habilitar Node.js para el dominio
+1. En el dominio, buscar **"Node.js"** en el panel
+2. Clic en **"Node.js"**
+3. Activar con el botón **"Habilitar Node.js"**
+
+### 2.3 Configuración de Node.js:
+
+```
+Versión de Node.js:        18.x (o la más reciente disponible)
+Modo de aplicación:        production
+Raíz del documento:        /httpdocs
+Directorio de aplicación:  /httpdocs
+Archivo de inicio:         backend/dist/server.js
+```
+
+## 📂 Paso 3: Subir Archivos
+
+### Opción A: Usando Git por SSH (Recomendado)
+
+```bash
+# Conectar por SSH
+ssh tu_usuario@tu_servidor.com
+
+# Navegar al directorio del dominio
+cd /var/www/vhosts/tu-dominio.com/httpdocs/
+
+# Clonar repositorio
 git clone https://github.com/gest7seguridad/Event-System.git .
 
-# Dar permisos
+# Dar permisos correctos
+chown -R tu_usuario:psacln .
 chmod -R 755 .
 ```
 
-### Opción B: Usando FTP/Administrador de Archivos
-1. Descargar el proyecto desde GitHub
-2. Subir todos los archivos a `/httpdocs/` del dominio
-3. Asegurarse de subir también archivos ocultos (.env, .gitignore)
+### Opción B: Usando Administrador de Archivos de Plesk
 
-## 🗄️ Paso 3: Configurar Base de Datos Remota
+1. Ir a **"Administrador de archivos"**
+2. Navegar a `/httpdocs`
+3. Subir archivo `.tar.gz` o `.zip` del proyecto
+4. Extraer en el servidor
+5. Verificar permisos (755 para directorios, 644 para archivos)
 
-### 3.1 Crear archivo de configuración
+### Opción C: Usando FTP
+
 ```bash
-# En el directorio del dominio
-cp .env.production.remote .env
+# Conectar con FileZilla o cliente FTP
+Host: ftp.tu-dominio.com
+Usuario: tu_usuario_ftp
+Puerto: 21
 
-# Editar el archivo
+# Subir todas las carpetas:
+- backend/
+- frontend/
+- Todos los archivos de la raíz
+```
+
+## 🔧 Paso 4: Configurar Variables de Entorno
+
+### 4.1 Crear archivo .env
+```bash
+# Por SSH
+cd /var/www/vhosts/tu-dominio.com/httpdocs/
+cp .env.example .env
 nano .env
 ```
 
-### 3.2 Configurar variables importantes:
+### 4.2 Configurar variables importantes:
 ```env
-# Base de datos remota (YA CONFIGURADA)
+# Entorno
+NODE_ENV=production
+PORT=3000
+
+# Base de datos remota (NO CAMBIAR)
 DB_HOST=gestsiete.es
 DB_PORT=5432
 DB_USER=events_u
 DB_PASSWORD=events_pass$$
 DB_NAME=events_n
 
-# Cambiar JWT Secret
-JWT_SECRET=generar_cadena_aleatoria_segura_minimo_32_caracteres
+# JWT (CAMBIAR)
+JWT_SECRET=genera_string_aleatorio_seguro_minimo_32_caracteres
 
-# Configurar SMTP
+# SMTP (Configurar con tus datos)
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USER=tu-email@gmail.com
 SMTP_PASS=tu-app-password
-EMAIL_FROM="SolarEdge Event" <noreply@gestsiete.es>
+EMAIL_FROM="SolarEdge Event" <noreply@tu-dominio.com>
 
 # URLs
-FRONTEND_URL=https://events.gestsiete.es
-BACKEND_URL=https://events.gestsiete.es
-PORT=3000  # Plesk suele usar 3000 para Node.js
+FRONTEND_URL=https://tu-dominio.com
+BACKEND_URL=https://tu-dominio.com
 ```
 
-## 📂 Paso 4: Preparar el Backend
+### 4.3 Variables en Panel de Plesk
 
-### 4.1 Instalar dependencias del backend
+En la configuración de Node.js, sección **"Variables de entorno personalizadas"**:
+
+Añadir cada variable clave:
+- `NODE_ENV` → `production`
+- `DB_HOST` → `gestsiete.es`
+- `DB_USER` → `events_u`
+- `DB_PASSWORD` → `events_pass$$`
+- `DB_NAME` → `events_n`
+- `JWT_SECRET` → `tu_secret_seguro`
+
+## 🔨 Paso 5: Compilar y Preparar
+
+### 5.1 Instalar dependencias y compilar
 ```bash
+# Por SSH en el directorio del dominio
+cd /var/www/vhosts/tu-dominio.com/httpdocs/
+
+# Backend
 cd backend
-
-# Instalar todas las dependencias
-npm install
-
-# Compilar TypeScript a JavaScript
+npm ci --production=false
 npm run build
+npm prune --production
 
-# Verificar que se creó la carpeta dist/
-ls -la dist/
-```
-
-### 4.2 Migrar base de datos
-```bash
-# Desde la raíz del proyecto
-./migrate-to-remote.sh
-
-# O manualmente:
-PGPASSWORD='events_pass$$' psql -h gestsiete.es -U events_u -d events_n < database_backup.sql
-```
-
-## 🎨 Paso 5: Configurar el Frontend
-
-### 5.1 Compilar el frontend
-```bash
-cd frontend
-
-# Instalar dependencias
-npm install
-
-# Compilar para producción
+# Frontend
+cd ../frontend
+npm ci --production=false  
 npm run build
-
-# Verificar que se creó dist/
-ls -la dist/
 ```
 
-### 5.2 Mover archivos estáticos
+### 5.2 Verificar compilación
 ```bash
-# Desde la raíz del proyecto
-cp -r frontend/dist/* httpdocs/
-
-# O crear enlace simbólico
-ln -s /var/www/vhosts/gestsiete.es/events.gestsiete.es/frontend/dist /var/www/vhosts/gestsiete.es/events.gestsiete.es/httpdocs
+# Debe existir:
+ls -la backend/dist/server.js
+ls -la frontend/dist/index.html
 ```
 
-## ⚙️ Paso 6: Configurar Node.js en Plesk
+## 🌐 Paso 6: Configurar Apache & Nginx
 
-### 6.1 En el panel de Node.js del dominio:
+En Plesk, ir a **"Configuración de Apache & nginx"** del dominio:
 
-1. **Archivo de inicio de la aplicación:**
-   ```
-   backend/dist/server.js
-   ```
+### 6.1 Configuración adicional de nginx:
 
-2. **Directorio raíz de la aplicación:**
-   ```
-   /backend
-   ```
-
-3. **Variables de entorno:** (Añadir una por una)
-   - `NODE_ENV` = `production`
-   - `DB_HOST` = `gestsiete.es`
-   - `DB_PORT` = `5432`
-   - `DB_USER` = `events_u`
-   - `DB_PASSWORD` = `events_pass$$`
-   - `DB_NAME` = `events_n`
-   - `JWT_SECRET` = `tu_secret_seguro`
-   - Agregar todas las variables del .env
-
-4. **Hacer clic en "Reiniciar aplicación"**
-
-## 🌐 Paso 7: Configurar Nginx/Apache en Plesk
-
-### 7.1 Configuración adicional de Apache & nginx
-
-En **Configuración de Apache & nginx** del dominio, agregar:
-
-#### Directivas adicionales de nginx:
 ```nginx
-# Proxy para API Backend
+# Servir archivos estáticos del frontend
+location / {
+    root /var/www/vhosts/tu-dominio.com/httpdocs/frontend/dist;
+    try_files $uri $uri/ /index.html;
+    expires 1d;
+    add_header Cache-Control "public, immutable";
+}
+
+# Proxy para API backend
 location /api {
     proxy_pass http://127.0.0.1:3000;
     proxy_http_version 1.1;
@@ -179,226 +208,202 @@ location /api {
     proxy_set_header X-Forwarded-Proto $scheme;
 }
 
-# Frontend React
-location / {
-    try_files $uri $uri/ /index.html;
+# Archivos estáticos
+location ~* \.(jpg|jpeg|png|gif|ico|css|js|svg|woff|woff2|ttf|eot)$ {
+    expires 30d;
+    add_header Cache-Control "public, immutable";
 }
 
-# Tamaño máximo de archivo
+# Tamaño máximo de upload
 client_max_body_size 10M;
 
-# Headers de seguridad
-add_header X-Frame-Options "SAMEORIGIN" always;
-add_header X-Content-Type-Options "nosniff" always;
-add_header X-XSS-Protection "1; mode=block" always;
+# Compresión
+gzip on;
+gzip_types text/plain text/css text/javascript application/javascript application/json;
+gzip_vary on;
 ```
 
-#### Directivas adicionales de Apache:
+### 6.2 Configuración HTTP adicional de Apache:
+
 ```apache
-# Si usas Apache como proxy
-ProxyPass /api http://127.0.0.1:3000/api
-ProxyPassReverse /api http://127.0.0.1:3000/api
+# Headers de seguridad
+Header set X-Frame-Options "SAMEORIGIN"
+Header set X-Content-Type-Options "nosniff"
+Header set X-XSS-Protection "1; mode=block"
+Header set Referrer-Policy "strict-origin-when-cross-origin"
 
-# Rewrite para React Router
-<Directory /var/www/vhosts/gestsiete.es/events.gestsiete.es/httpdocs>
-    Options -MultiViews
-    RewriteEngine On
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteRule ^ index.html [QSA,L]
-</Directory>
+# Habilitar compresión
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json
+</IfModule>
 ```
 
-## 🔒 Paso 8: Configurar SSL
+## ▶️ Paso 7: Iniciar Aplicación
 
-### En Plesk:
-1. Ir a **SSL/TLS Certificates**
-2. Instalar certificado Let's Encrypt (gratis)
-3. Activar redirección permanente 301 de HTTP a HTTPS
-4. Activar HTTP/2
+### 7.1 En el panel de Node.js de Plesk:
 
-## ✅ Paso 9: Verificación
+1. Verificar configuración:
+   - **Archivo de inicio:** `backend/dist/server.js`
+   - **Modo:** `production`
+   - **Puerto:** Dejar que Node.js lo asigne
 
-### 9.1 Verificar el backend:
+2. Clic en **"Reiniciar aplicación"**
+
+3. Clic en **"Ejecutar script NPM"**:
+   - Seleccionar: `install`
+   - Directorio: `/backend`
+   - Ejecutar
+
+### 7.2 Verificar que funciona:
 ```bash
-# Desde SSH
-curl http://localhost:3000/api/health
+# Por SSH
+curl http://127.0.0.1:3000/api/health
 
-# Desde navegador
-https://events.gestsiete.es/api/health
+# Debe responder:
+# {"status":"OK","timestamp":"..."}
 ```
 
-### 9.2 Verificar el frontend:
-- Abrir: https://events.gestsiete.es
-- Debe cargar la página principal del evento
+## ✅ Paso 8: Verificación Final
 
-### 9.3 Verificar el admin:
-- Acceder a: https://events.gestsiete.es/admin
-- Usuario: `admin@solarland.com`
-- Contraseña: `admin123`
+### URLs para verificar:
+- **Frontend:** https://tu-dominio.com
+- **API Health:** https://tu-dominio.com/api/health
+- **Admin Panel:** https://tu-dominio.com/admin
 
-## 🔄 Paso 10: Configurar PM2 (Opcional pero Recomendado)
+### Credenciales iniciales:
+- Email: `admin@solarland.com`
+- Password: `admin123`
 
-### Instalar PM2 para mejor gestión:
+## 🔧 Solución de Problemas
+
+### Error 502 Bad Gateway
 ```bash
-# Instalar PM2 globalmente
+# Verificar que Node.js está ejecutándose
+ps aux | grep node
+
+# Ver logs de Node.js en Plesk
+tail -f /var/www/vhosts/tu-dominio.com/logs/proxy_error_log
+
+# Reiniciar desde Plesk
+plesk bin extension --exec nodejs restart.js
+```
+
+### La aplicación no inicia
+```bash
+# Verificar archivo de inicio
+ls -la /var/www/vhosts/tu-dominio.com/httpdocs/backend/dist/server.js
+
+# Verificar permisos
+chown -R tu_usuario:psacln /var/www/vhosts/tu-dominio.com/httpdocs/
+chmod -R 755 /var/www/vhosts/tu-dominio.com/httpdocs/
+```
+
+### Frontend muestra página en blanco
+```bash
+# Verificar que frontend está compilado
+ls -la frontend/dist/
+
+# Si no existe, compilar:
+cd frontend && npm run build
+
+# Verificar configuración de nginx
+nginx -t
+```
+
+### Base de datos no conecta
+```bash
+# Probar conexión desde el servidor
+PGPASSWORD='events_pass$$' psql -h gestsiete.es -U events_u -d events_n -c '\dt'
+
+# Verificar variables de entorno
+cd backend && node -e "console.log(process.env.DB_HOST)"
+```
+
+## 📊 Monitoreo
+
+### Ver logs en Plesk:
+1. Ir a **"Registros"** del dominio
+2. Seleccionar tipo de log:
+   - **access_ssl_log** - Accesos HTTPS
+   - **error_log** - Errores de Apache
+   - **proxy_error_log** - Errores de Node.js
+
+### Monitorear recursos:
+1. Ir a **"Estadísticas"**
+2. Ver uso de CPU, RAM y disco
+3. Configurar alertas si es necesario
+
+## 🔄 Actualización del Código
+
+### Script de actualización (`update.sh`):
+```bash
+#!/bin/bash
+cd /var/www/vhosts/tu-dominio.com/httpdocs/
+
+# Backup
+tar -czf backup-$(date +%Y%m%d).tar.gz backend/dist frontend/dist
+
+# Actualizar código
+git pull origin main
+
+# Recompilar
+cd backend && npm ci && npm run build
+cd ../frontend && npm ci && npm run build
+
+# Reiniciar Node.js desde Plesk
+plesk bin extension --exec nodejs restart.js
+
+echo "✅ Actualización completada"
+```
+
+## 🚀 Optimizaciones para Producción
+
+### 1. Configurar PM2 (Opcional pero recomendado)
+```bash
+# Instalar PM2
 npm install -g pm2
 
-# Crear archivo ecosystem
-cat > ecosystem.config.js << 'EOF'
+# Crear configuración
+cat > ecosystem.config.js << EOF
 module.exports = {
   apps: [{
     name: 'solaredge-backend',
-    script: './backend/dist/server.js',
+    script: 'backend/dist/server.js',
     instances: 2,
     exec_mode: 'cluster',
     env: {
-      NODE_ENV: 'production',
-      PORT: 3000
-    },
-    error_file: './logs/err.log',
-    out_file: './logs/out.log',
-    log_file: './logs/combined.log',
-    time: true
+      NODE_ENV: 'production'
+    }
   }]
-};
+}
 EOF
 
 # Iniciar con PM2
 pm2 start ecosystem.config.js
-
-# Guardar configuración
 pm2 save
-pm2 startup
 ```
 
-## 📊 Monitoreo y Logs
+### 2. Configurar CDN para archivos estáticos
+- Usar Cloudflare o CDN de Plesk
+- Cachear archivos en `/frontend/dist`
 
-### Ver logs en Plesk:
-1. Ir a **Registros** en el dominio
-2. Seleccionar **Registro de Node.js**
+### 3. Activar HTTP/2
+En Plesk → Configuración de hosting → Habilitar HTTP/2
 
-### Ver logs por SSH:
-```bash
-# Logs de Node.js
-tail -f /var/www/vhosts/gestsiete.es/logs/error_log
+## 📝 Checklist Final
 
-# Logs de PM2 (si lo usas)
-pm2 logs
-
-# Logs del sistema
-journalctl -u plesk-node -f
-```
-
-## 🚨 Solución de Problemas Comunes
-
-### Error: "502 Bad Gateway"
-```bash
-# Reiniciar Node.js desde Plesk
-# O por SSH:
-plesk bin extension --exec nodejs npm_restart.js
-
-# Verificar que el puerto sea correcto
-netstat -tlpn | grep 3000
-```
-
-### Error: "Cannot find module"
-```bash
-cd backend
-npm install --production
-npm run build
-```
-
-### El frontend no carga archivos estáticos:
-```bash
-# Verificar permisos
-chmod -R 755 /var/www/vhosts/gestsiete.es/events.gestsiete.es/httpdocs
-chown -R psacln:psaserv httpdocs/
-```
-
-### La base de datos no conecta:
-```bash
-# Probar conexión
-PGPASSWORD='events_pass$$' psql -h gestsiete.es -U events_u -d events_n -c '\dt'
-
-# Verificar variables de entorno en Plesk
-plesk bin extension --exec nodejs show-config.js
-```
-
-## 🔐 Seguridad Post-Instalación
-
-1. **Cambiar contraseña de admin inmediatamente**
-2. **Configurar Firewall de Plesk:**
-   - Solo permitir puertos necesarios
-   - Activar Fail2Ban
-
-3. **Configurar Backups en Plesk:**
-   - Ir a **Copias de seguridad**
-   - Configurar backup diario
-   - Incluir base de datos remota si es posible
-
-4. **Monitoreo:**
-   - Activar **Monitor de Salud** en Plesk
-   - Configurar alertas por email
-
-## 📝 Script de Despliegue Automatizado
-
-Crear archivo `deploy-plesk.sh`:
-```bash
-#!/bin/bash
-
-echo "🚀 Desplegando en Plesk..."
-
-# Variables
-DOMAIN_PATH="/var/www/vhosts/gestsiete.es/events.gestsiete.es"
-
-# Actualizar código
-cd $DOMAIN_PATH
-git pull origin main
-
-# Backend
-cd backend
-npm install --production
-npm run build
-
-# Frontend
-cd ../frontend
-npm install
-npm run build
-
-# Copiar frontend a httpdocs
-cp -r dist/* ../httpdocs/
-
-# Reiniciar Node.js
-plesk bin extension --exec nodejs npm_restart.js
-
-echo "✅ Despliegue completado"
-```
-
-## ✅ Checklist Final
-
-- [ ] Dominio creado en Plesk
-- [ ] Node.js habilitado y configurado
-- [ ] Archivos subidos al servidor
-- [ ] Base de datos remota conectada
-- [ ] Backend compilado y funcionando
-- [ ] Frontend compilado y accesible
-- [ ] SSL/HTTPS configurado
+- [ ] Node.js 18+ configurado en Plesk
+- [ ] Archivo de inicio: `backend/dist/server.js`
 - [ ] Variables de entorno configuradas
-- [ ] Nginx/Apache configurado correctamente
+- [ ] Backend compilado (`npm run build`)
+- [ ] Frontend compilado (`npm run build`)
+- [ ] SSL/HTTPS activado
+- [ ] Nginx configurado para SPA
+- [ ] API respondiendo en `/api/health`
+- [ ] Frontend cargando correctamente
 - [ ] Admin password cambiado
-- [ ] Backups configurados
-- [ ] Monitoreo activo
-
-## 📞 Soporte
-
-Si tienes problemas:
-1. Revisar logs en Plesk → Registros
-2. Verificar estado de Node.js en el panel
-3. Comprobar conexión a BD remota
-4. Verificar que todos los puertos estén correctos
+- [ ] Backups configurados en Plesk
 
 ---
 
-**¡Sistema listo para producción en Plesk!** 🎉
-
-**Nota:** Plesk gestiona automáticamente el reinicio de Node.js si se cae, pero PM2 ofrece mejor control y monitoreo.
+¡Sistema listo en Plesk Onyx! 🎉
