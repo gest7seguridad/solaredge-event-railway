@@ -2,10 +2,10 @@
   "name": "solaredge-event-registration",
   "version": "1.0.0",
   "description": "Sistema de inscripción para evento presencial SolarEdge - Solarland",
-  "main": "backend/dist/server.js",
+  "main": "app.js",
   "scripts": {
-    "start": "node backend/dist/server.js",
-    "start:production": "node backend/dist/server.js",
+    "start": "node app.js",
+    "start:production": "node app.js",
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "dev:backend": "cd backend && npm run dev",
     "dev:frontend": "cd frontend && npm run dev",
