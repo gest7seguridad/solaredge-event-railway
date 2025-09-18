@@ -1,14 +1,35 @@
 # 🔧 Guía de Solución de Problemas para Plesk - Event System
 
-## Error 502 Bad Gateway - Soluciones
+## ⚠️ IMPORTANTE: Error 502 Bad Gateway Persistente
 
-### 1. Verificar que la Aplicación Node.js está Ejecutándose
+Si después de actualizar sigues viendo el error 502, el problema es que Node.js NO está ejecutándose correctamente en Plesk.
+
+## 🚨 SOLUCIÓN RÁPIDA - Pasos Ordenados
+
+### PASO 1: Probar con servidor mínimo
+
+1. En Plesk, cambiar **Application Startup File** a: `server-minimal.js`
+2. Click en **Restart App**
+3. Esperar 30 segundos
+4. Visitar: `https://solarland.gestsiete.es/api/health`
+5. Si funciona, el problema está en las dependencias. Si NO funciona, el problema es de configuración de Plesk.
+
+### PASO 2: Verificar que Node.js está instalado correctamente
+
+SSH al servidor y ejecutar:
+```bash
+node --version
+npm --version
+which node
+```
+
+### PASO 3: Verificar el estado real de la aplicación
 
 En el panel de Plesk:
 1. Ir a **Node.js**
 2. Verificar el estado de la aplicación
-3. Si está detenida, hacer click en **Start Application**
-4. Si está corriendo, hacer click en **Restart Application**
+3. Click en **Logs** para ver errores específicos
+4. Si ves "Module not found", ejecutar `npm install --production`
 
 ### 2. Verificar el Puerto de la Aplicación
 
