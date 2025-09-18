@@ -27,7 +27,20 @@ app.use(cors({
 app.use(express.json());
 
 // Servir archivos estáticos del frontend
-app.use(express.static(path.join(__dirname, 'frontend/dist')));
+// Servir archivos estáticos del frontend desde backend/public (producción)
+const publicPath = path.join(__dirname, 'backend/public');
+if (fs.existsSync(publicPath)) {
+  app.use(express.static(publicPath));
+  console.log(`[INFO] Sirviendo archivos estáticos desde: ${publicPath}`);
+} else {
+  console.log('[WARNING] No se encontró directorio backend/public. Ejecuta npm run build en frontend/');
+  // Fallback para desarrollo
+  const devPath = path.join(__dirname, 'frontend/dist');
+  if (fs.existsSync(devPath)) {
+    app.use(express.static(devPath));
+    console.log(`[INFO] Usando directorio de desarrollo: ${devPath}`);
+  }
+}
 
 // ==================== API ENDPOINTS ====================
 
@@ -784,7 +797,21 @@ app.post('/api/registrations/check-in/:code', async (req, res) => {
 // Servir el frontend para todas las rutas no API
 app.use((req, res, next) => {
   if (!req.path.startsWith('/api')) {
-    res.sendFile(path.join(__dirname, 'frontend/dist/index.html'));
+    const indexPath = path.join(__dirname, 'backend/public/index.html');
+    if (fs.existsSync(indexPath)) {
+      res.sendFile(indexPath);
+    } else {
+      // Fallback para desarrollo
+      const devIndexPath = path.join(__dirname, 'frontend/dist/index.html');
+      if (fs.existsSync(devIndexPath)) {
+        res.sendFile(devIndexPath);
+      } else {
+        res.status(404).json({
+          message: 'Frontend no encontrado. Ejecuta npm run build en frontend/',
+          checkedPaths: [indexPath, devIndexPath]
+        });
+      }
+    }
   } else {
     next();
   }
@@ -802,7 +829,8 @@ app.use((err, req, res, next) => {
 
 // ==================== START SERVER ====================
 
-app.listen(PORT, () => {
+// Escuchar en todas las interfaces (necesario para Plesk)
+app.listen(PORT, '0.0.0.0', () => {
   console.log('========================================');
   console.log('🚀 SERVIDOR DE PRODUCCIÓN INICIADO');
   console.log('========================================');
