@@ -5,11 +5,11 @@ module.exports = {
   development: {
     client: 'postgresql',
     connection: {
-      host: process.env.DB_HOST || 'localhost',
+      host: process.env.DB_HOST || 'server.radioinsular.es',
       port: process.env.DB_PORT || 5432,
-      database: process.env.DB_NAME || 'solaredge_event',
-      user: process.env.DB_USER || 'postgres',
-      password: process.env.DB_PASSWORD || 'postgres'
+      database: process.env.DB_NAME || 'eventos_n',
+      user: process.env.DB_USER || 'eventos_u',
+      password: process.env.DB_PASSWORD || 'eventos_pass'
     },
     pool: {
       min: 2,
@@ -27,11 +27,11 @@ module.exports = {
   production: {
     client: 'postgresql',
     connection: {
-      host: process.env.DB_HOST || 'gestsiete.es',
+      host: process.env.DB_HOST || 'server.radioinsular.es',
       port: process.env.DB_PORT || 5432,
-      database: process.env.DB_NAME || 'events_n',
-      user: process.env.DB_USER || 'events_u',
-      password: process.env.DB_PASSWORD || 'events_pass$$',
+      database: process.env.DB_NAME || 'eventos_n',
+      user: process.env.DB_USER || 'eventos_u',
+      password: process.env.DB_PASSWORD || 'eventos_pass',
       ssl: { rejectUnauthorized: false }
     },
     pool: {

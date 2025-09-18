@@ -13,11 +13,11 @@ dotenv.config({ path: path.join(__dirname, '../.env') });
 const dbConfig = {
   client: 'postgresql',
   connection: {
-    host: process.env.DB_HOST || 'gestsiete.es',
+    host: process.env.DB_HOST || 'server.radioinsular.es',
     port: process.env.DB_PORT || 5432,
-    database: process.env.DB_NAME || 'events_n',
-    user: process.env.DB_USER || 'events_u',
-    password: process.env.DB_PASSWORD || 'events_pass$$',
+    database: process.env.DB_NAME || 'eventos_n',
+    user: process.env.DB_USER || 'eventos_u',
+    password: process.env.DB_PASSWORD || 'eventos_pass',
     ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
   }
 };
