@@ -237,8 +237,12 @@ app.get('/api/registrations', async (req, res) => {
 // ==================== SPA FALLBACK ====================
 
 // Servir el frontend para todas las rutas no API
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'frontend/dist/index.html'));
+app.use((req, res, next) => {
+  if (!req.path.startsWith('/api')) {
+    res.sendFile(path.join(__dirname, 'frontend/dist/index.html'));
+  } else {
+    next();
+  }
 });
 
 // ==================== ERROR HANDLER ====================
