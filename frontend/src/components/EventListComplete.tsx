@@ -25,10 +25,21 @@ interface Event {
   venue_name?: string
   venue_address?: string
   venue_city?: string
+  venue_postal_code?: string
   venue_google_maps_url?: string
+  google_maps_url?: string
   max_attendees?: number
   enable_waitlist?: boolean
   agenda?: any[]
+  registration_info?: string
+  requirements?: string
+  materials?: string
+  tags?: string[]
+  facebook_url?: string
+  twitter_url?: string
+  organizer_name?: string
+  organizer_email?: string
+  organizer_phone?: string
 }
 
 const EventListComplete = () => {
@@ -41,7 +52,9 @@ const EventListComplete = () => {
     async () => {
       const response = await eventService.getAllEvents()
       console.log('Events response:', response.data)
-      return response.data
+      // The backend returns the array directly, and axios wraps it in response.data
+      // Ensure we always return an array
+      return Array.isArray(response.data) ? response.data : []
     },
     {
       onError: (error: any) => {
