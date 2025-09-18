@@ -1,40 +1,24 @@
 {
-  "name": "solaredge-event-registration",
+  "name": "solaredge-event",
   "version": "1.0.0",
-  "description": "Sistema de inscripción para evento presencial SolarEdge - Solarland",
-  "main": "app.js",
-  "scripts": {
-    "start": "node app.js",
-    "start:production": "node app.js",
-    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
-    "dev:backend": "cd backend && npm run dev",
-    "dev:frontend": "cd frontend && npm run dev",
-    "build": "node build.mjs",
-    "build:backend": "cd backend && npm run build",
-    "build:frontend": "cd frontend && npm run build",
-    "install:deps": "cd backend && npm install && cd ../frontend && npm install && cd ..",
-    "test": "npm run test:backend && npm run test:frontend",
-    "test:backend": "cd backend && npm test",
-    "test:frontend": "cd frontend && npm test",
-    "db:migrate": "cd backend && npm run db:migrate",
-    "db:seed": "cd backend && npm run db:seed"
-  },
+  "description": "Sistema de inscripción para evento SolarEdge",
+  "private": true,
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=9.0.0"
   },
-  "dependencies": {
-    "axios": "^1.12.2",
-    "bcryptjs": "^3.0.2",
-    "cors": "^2.8.5",
-    "dotenv": "^16.6.1",
-    "express": "^5.1.0",
-    "jsonwebtoken": "^9.0.2",
-    "pg": "^8.16.3"
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "build": "npm run build:backend && npm run build:frontend",
+    "build:backend": "cd backend && npm run build",
+    "build:frontend": "cd frontend && npm run build",
+    "start": "cd backend && npm start",
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "migrate:prod": "cd backend && NODE_ENV=production npm run db:migrate:prod"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
-  },
-  "author": "Solarland",
-  "license": "MIT"
+  }
 }

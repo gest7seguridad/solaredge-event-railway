@@ -1,28 +1,22 @@
-# Configuración de Nixpacks para Railway
-# https://nixpacks.com/docs/configuration/file
-
-# Proveedor y versión de Node.js
 [phases.setup]
-nixPkgs = ["nodejs-18_x"]
+nixPkgs = ["nodejs-18_x", "npm-9_x"]
 
-# Usar script de build optimizado - NO ejecutar migraciones aquí
-[phases.build]
+[phases.install]
 cmds = [
-  "chmod +x railway-build.sh",
-  "./railway-build.sh"
+  "cd backend && npm ci --production=false",
+  "cd ../frontend && npm ci"
 ]
 
-# Variables de entorno necesarias para el build
+[phases.build]
+cmds = [
+  "cd backend && npm run build",
+  "cd ../frontend && npm run build",
+  "mkdir -p ../backend/public",
+  "cp -r ../frontend/dist/* ../backend/public/"
+]
+
+[start]
+cmd = "cd backend && npm start"
+
 [variables]
 NODE_ENV = "production"
-NPM_CONFIG_PRODUCTION = "false"
-NPM_CONFIG_OPTIONAL = "false"
-NPM_CONFIG_AUDIT = "false"
-NPM_CONFIG_FUND = "false"
-PUPPETEER_SKIP_DOWNLOAD = "true"
-PUPPETEER_SKIP_CHROMIUM_DOWNLOAD = "true"
-NIXPACKS_NO_RELEASE = "true"
-
-# Comando de inicio
-[start]
-cmd = "cd backend && node dist/server.js"

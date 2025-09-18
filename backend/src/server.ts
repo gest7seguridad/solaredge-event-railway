@@ -35,12 +35,14 @@ const limiter = rateLimit({
 app.use(helmet());
 
 // Configuración CORS para desarrollo y producción
-const allowedOrigins = [
-  'http://localhost:3000',
-  'http://localhost:5173',
-  'https://solarland.gestsiete.es',
-  process.env.FRONTEND_URL || 'http://localhost:3000'
-].filter(Boolean);
+const allowedOrigins = process.env.CORS_ORIGINS 
+  ? process.env.CORS_ORIGINS.split(',').map(origin => origin.trim())
+  : [
+      'http://localhost:3000',
+      'http://localhost:5173',
+      'https://solarland.gestsiete.es',
+      process.env.FRONTEND_URL || 'http://localhost:3000'
+    ].filter(Boolean);
 
 app.use(cors({
   origin: (origin, callback) => {
