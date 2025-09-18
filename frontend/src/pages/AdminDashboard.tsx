@@ -13,7 +13,7 @@ import LoadingSpinner from '../components/LoadingSpinner'
 import RegistrationsList from '../components/RegistrationsList'
 import DashboardStats from '../components/DashboardStats'
 import LogoUploader from '../components/LogoUploader'
-import EventManagement from '../components/EventManagement'
+import EventListComplete from '../components/EventListComplete'
 import SMTPConfig from '../components/SMTPConfig'
 
 const AdminDashboard = () => {
@@ -343,7 +343,7 @@ Equipo SolarEdge - Solarland`
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            <EventManagement />
+            <EventListComplete />
           </motion.div>
         )}
 
